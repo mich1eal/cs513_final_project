@@ -8,6 +8,7 @@ Michael Miller and Shane Sepac for University of Illinois CS 513
 from os import path
 import zipfile
 import pandas as pd
+import re
 from assertion_chain import AssertionChain
 
 
@@ -31,6 +32,17 @@ license_not_null = lambda df: ~df['License #'].isnull() & ~df['License #'].isna(
 chain.add(name='License not null', clean_assert=license_not_null)
 
 chain.add(name='License > 0', clean_assert=lambda df: df['License #'] > 0)
+
+def trim_check(s):
+    """true if first or last char is whitespace"""
+    return bool(re.search(r'\s$', s)) or bool(re.search(r'^\s', s))
+
+name_trim = lambda df: ~df['DBA Name'].apply(trim_check)
+
+chain.add(name='DBA Name Whitespace', 
+          clean_assert=name_trim,
+          operation='apply',
+          resolve=lambda df: df['DBA Name'].apply(str.trim))
 
 # explore assertion chain to understand impacts on dataset
 chain.explore_chain(raw_df)

@@ -54,7 +54,8 @@ chain = AssertionChain(out_path=PATH_OUT, explore_path=PATH_LOG)
 #inspection ID should be unique
 id_not_null = lambda df: ~df['Inspection ID'].isnull() & ~df['Inspection ID'].isna()
 chain.add(name='Inspection ID not null', clean_assert=id_not_null)
-chain.add(name='Inspection ID is int', clean_assert=lambda df: df['Inspection ID'].apply(lambda val: isinstance(val, int)))
+chain.add(name='Inspection ID is int', 
+          clean_assert=lambda df: df['Inspection ID'].apply(lambda val: isinstance(val, int)))
 chain.add(name='Inspection ID is unique',  
           clean_assert=lambda df: ~df.duplicated('Inspection ID', keep='first'))
 
@@ -62,7 +63,8 @@ chain.add(name='Inspection ID is unique',
 #license should exist, be >0
 license_not_null = lambda df: ~df['License #'].isnull() & ~df['License #'].isna()
 chain.add(name='License not null', clean_assert=license_not_null)
-chain.add(name='License is int', clean_assert=lambda df: df['License #'].apply(float.is_integer))
+chain.add(name='License is int', 
+          clean_assert=lambda df: df['License #'].apply(float.is_integer))
 chain.add(name='License > 0', clean_assert=lambda df: df['License #'] > 0)
 
 # checks on name
@@ -81,7 +83,6 @@ chain.add(name='Name has no outside whitespace',
 #name can't be blank
 chain.add(name='Name not blank', clean_assert=lambda df: df['DBA Name'].str.len() > 0)
 
-
 #name should be all caps
 chain.add(name='Name is all caps', 
           clean_assert=lambda df: ~df['DBA Name'].str.islower(),
@@ -94,7 +95,6 @@ chain.add(name='Risk is valid', clean_assert=lambda df: df['Risk'].isin(VALID_RI
 
 # checks on results
 chain.add(name='Results is valid', clean_assert=lambda df: df['Results'].isin(VALID_RESULTS))
-
 
 # checks on date
 is_valid_date = lambda df: pd.to_datetime(df['Inspection Date'], errors='coerce').notnull()

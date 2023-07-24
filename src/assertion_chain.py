@@ -56,7 +56,7 @@ class AssertionChain:
         
         # for apply, we apply resolve function to invalid rows 
         elif assertion['operation'] == 'apply':
-            df[~valid_idx] = assertion['resolve'](df[~valid_idx])
+            df.loc[~valid_idx] = assertion['resolve'](df.loc[~valid_idx])
             
         return df
      
@@ -84,7 +84,7 @@ class AssertionChain:
         to explore_path. 
         Saves final claned data in explore_path and returns it
         """
-        print('EXPORING DATASET')
+        print('EXPLORING DATASET')
         
         for i, assertion in enumerate(self.assertion_chain):
             print(f'Assertion {i}: {assertion["name"]}:')

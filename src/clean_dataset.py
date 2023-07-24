@@ -20,29 +20,50 @@ RAW_CSV = 'Food_Inspections.csv'
 PATH_OUT = path.join('..', 'data', 'processed')
 PATH_LOG = path.join('..', 'data', 'log')
 
+VALID_RISKS = ['Risk 1 (High)', 'Risk 2 (Medium)', 'Risk 3 (Low)']
+
+############### helper functions ################
+def has_outside_whitespace(string):
+    """true if first or last char is whitespace"""
+    return bool(re.search(r'\s$', string)) or bool(re.search(r'^\s', string))
+
+def trim_column(df, column):
+    """trim whitespace from name column"""
+    df[column] = df[column].apply(lambda name: name.strip())
+    return df
+
+
+############### load data ################
 # load raw data into dataframe
+print('Loading data')
 zipped = zipfile.ZipFile(path.join(PATH_RAW, RAW_ZIP))
 raw_df = pd.read_csv(zipped.open(RAW_CSV))
 
-# set up AssertionCHain for cleaning 
+############### setup AssertionChain ################
 chain = AssertionChain(out_path=PATH_OUT, explore_path=PATH_LOG)
 
-# add assertions that we want to check, and functions to resolve (drop by default)
+# checks on license 
+#license should exist, be >0
 license_not_null = lambda df: ~df['License #'].isnull() & ~df['License #'].isna()
 chain.add(name='License not null', clean_assert=license_not_null)
-
 chain.add(name='License > 0', clean_assert=lambda df: df['License #'] > 0)
 
-def trim_check(s):
-    """true if first or last char is whitespace"""
-    return bool(re.search(r'\s$', s)) or bool(re.search(r'^\s', s))
+# checks on name
+chain.add(name='Name not null', clean_assert=lambda df: ~df['DBA Name'].isnull())
 
-name_trim = lambda df: ~df['DBA Name'].apply(trim_check)
+#name can't have leading/trailing whitespace
+no_whitespace = lambda df: ~df['DBA Name'].apply(has_outside_whitespace)
 
 chain.add(name='DBA Name Whitespace', 
-          clean_assert=name_trim,
+          clean_assert=no_whitespace,
           operation='apply',
-          resolve=lambda df: df['DBA Name'].apply(str.trim))
+          resolve=lambda df: trim_column(df, 'DBA Name'))
+
+# checks on risk
+#drop blanks or 'All'
+chain.add(name='Risk is valid', clean_assert=lambda df: df['Risk'].isin(VALID_RISKS))
+
+############### run AssertionChain ################
 
 # explore assertion chain to understand impacts on dataset
 chain.explore_chain(raw_df)

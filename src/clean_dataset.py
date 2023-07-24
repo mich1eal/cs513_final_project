@@ -23,6 +23,7 @@ PATH_LOG = path.join('..', 'data', 'log')
 VALID_RISKS = ['Risk 1 (High)', 'Risk 2 (Medium)', 'Risk 3 (Low)']
 VALID_RESULTS = ['Pass', 'Fail', 'Pass w/ Conditions']
 
+
 ############### helper functions ################
 def has_outside_whitespace(string):
     """true if first or last char is whitespace"""
@@ -45,6 +46,7 @@ print('Loading data')
 zipped = zipfile.ZipFile(path.join(PATH_RAW, RAW_ZIP))
 raw_df = pd.read_csv(zipped.open(RAW_CSV))
 
+
 ############### setup AssertionChain ################
 chain = AssertionChain(out_path=PATH_OUT, explore_path=PATH_LOG)
 
@@ -62,7 +64,6 @@ license_not_null = lambda df: ~df['License #'].isnull() & ~df['License #'].isna(
 chain.add(name='License not null', clean_assert=license_not_null)
 chain.add(name='License is int', clean_assert=lambda df: df['License #'].apply(float.is_integer))
 chain.add(name='License > 0', clean_assert=lambda df: df['License #'] > 0)
-
 
 # checks on name
 chain.add(name='Name not null', clean_assert=lambda df: ~df['DBA Name'].isnull())
@@ -102,7 +103,6 @@ chain.add(name='Date is valid', clean_assert=is_valid_date)
 
 
 ############### run AssertionChain ################
-
 # explore assertion chain to understand impacts on dataset
 chain.explore_chain(raw_df)
 
@@ -111,4 +111,3 @@ cleaned_df = chain.apply_chain(raw_df)
 
 # validate assertion chain
 chain.validate_chain(cleaned_df)
-

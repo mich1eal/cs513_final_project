@@ -110,7 +110,6 @@ class AssertionChain:
                 df = self._resolve_failures(df, assertion)
             print(f'\tRemaining rows: {len(df.index)}')
             
-        
         # output assertion log for reference 
         assertion_log = pd.DataFrame(self.assertion_chain)
         assertion_log = assertion_log[['name', 'fail_count', 'fail_percent']]

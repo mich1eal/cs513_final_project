@@ -96,21 +96,24 @@ class AssertionChain:
             fail_count = len(fail_rows.index)
             fail_percent = 100 * fail_count / len(df.index)
             fail_file = f'assertion{i}_failed_rows.csv'
-            
-            # write output
             print(f'\t{fail_count} rows fail ({fail_percent:.2f}%)')
-            print(f'\tFailed rows saved as {fail_file}')
-            fail_rows.to_csv(path.join(self.explore_path, fail_file))
             
-            # resolve failures so we can proceed to next assertion
-            print('\tApplying resolution function')
-            df = self._resolve_failures(df, assertion)
+            # stores values in assertions
+            self.assertion_chain[i]['fail_count'] = fail_count
+            self.assertion_chain[i]['fail_percent'] = fail_percent
+            
+            # write output and resolve failures 
+            if fail_count > 0:
+                print(f'\tFailed rows saved as {fail_file}')
+                fail_rows.to_csv(path.join(self.explore_path, fail_file))
+                print('\tApplying resolution function')
+                df = self._resolve_failures(df, assertion)
             print(f'\tRemaining rows: {len(df.index)}')
             
         
         # output assertion log for reference 
         assertion_log = pd.DataFrame(self.assertion_chain)
-        assertion_log = assertion_log['name']
+        assertion_log = assertion_log[['name', 'fail_count', 'fail_percent']]
         assertion_log.rename_axis('Assertion', inplace=True)
         assertion_log.to_csv(path.join(self.explore_path, 'assertions.csv'))
         

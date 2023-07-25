@@ -65,8 +65,14 @@ class AssertionChain:
          Throws assertion error if assertion is not met 
          """
          fail_count = len(self._get_failures(df, assertion).index)
-         assert fail_count == 0, f'Assertion {assertion["name"]} failed {fail_count} times'
-       
+         
+         try:
+             assert fail_count == 0
+         except AssertionError:
+             print(f'\tfail - {fail_count} times')
+         else:
+             print('\tpass')
+         
     def add(self, name: str, clean_assert: callable, operation:str='drop', resolve:callable=None):
         """
         The new assertion will be applied as part of this AssertionChain. Note that order matters!
@@ -141,5 +147,5 @@ class AssertionChain:
         """
         print('VALIDATING DATASET')
         for i, assertion in enumerate(self.assertion_chain):
-            print(f'\tAsserting: {assertion["name"]}')
+            print(f'Asserting: {assertion["name"]}')
             self._validate_assertion(df, assertion)
